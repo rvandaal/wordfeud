@@ -1,6 +1,7 @@
 import { GridCell, CellType } from './gridcell';
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { LetterTile } from './lettertile';
+import { KeyEventsPlugin } from '@angular/platform-browser/src/dom/events/key_events';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +14,11 @@ export class AppComponent {
 
   selectedColIndex: number;
   selectedRowIndex: number;
+
+  @HostListener('window:keyup', ['$event'])
+  keyEvent(event: KeyboardEvent) {
+    this.letters.push(new LetterTile(this.selectedRowIndex + 1, this.selectedColIndex + 1, String.fromCharCode(event.keyCode)));
+  }
 
   constructor() {
     const celldefs_dl = [7, 16, 28, 36, 38, 66, 68, 92, 94, 100, 102, 105, 119, 122, 124, 130, 132, 156, 158, 186, 188, 196, 208, 217];
