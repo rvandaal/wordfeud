@@ -40,13 +40,15 @@ export class BoardComponent implements OnInit {
           type = CellType.DW;
         } else if (celldefs_tw.includes(i)) {
           type = CellType.TW;
+        } else if (i === 112) {
+          type = CellType.Middle;
         }
 
         this.gridcells.push(new GridCell(row, col, type));
 
-        if (col === 5 && row > 6 && row < 12) {
-          this.letters.push(new LetterTile(row, col, 'A'));
-        }
+        // if (col === 5 && row > 6 && row < 12) {
+        //   this.letters.push(new LetterTile(row, col, 'A'));
+        // }
         i++;
       }
     }

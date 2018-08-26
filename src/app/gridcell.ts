@@ -1,5 +1,6 @@
 export enum CellType {
     None = '',
+    Middle = 'M',
     DL = 'DL',
     TL = 'TL',
     DW = 'DW',
