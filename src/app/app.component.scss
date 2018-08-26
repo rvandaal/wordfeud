@@ -77,13 +77,22 @@
   
   .letter {
     display: flex;
+    position: relative;
     justify-content: center;
     align-items: center;
+    padding: 1px 3px 0 0;
     border: 1px solid #191a1d;
     border-radius: 4px;
     background: #eeec9b;
     color: #32301b;
     font-weight: 600;
-    font-size: 28px;
+    font-size: 32px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+  }
+
+  .lettervalue {
+    position: absolute;
+    top: 1px;
+    right: 4px;
+    font-size: 16px;
   }

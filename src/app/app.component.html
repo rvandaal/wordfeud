@@ -6,7 +6,10 @@
       (click)="onClick(cell)">{{cell.type}}</div>
     </div>
     <div class="grid noevent">
-      <div class="letter" *ngFor="let letter of letters" [style.grid-row-start]="letter.row" [style.grid-column-start]="letter.col">{{letter.letter}}</div>
+      <div class="letter" *ngFor="let letter of letters" [style.grid-row-start]="letter.row" [style.grid-column-start]="letter.col">
+        {{letter.letter}}
+        <div class="lettervalue">{{letter.value}}</div>
+      </div>      
     </div>
   </div>
 </div>
