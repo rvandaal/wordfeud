@@ -2,6 +2,13 @@ import { Component, OnInit, Input, HostListener } from '@angular/core';
 import { GridCell, CellType } from '../gridcell';
 import { LetterTile } from '../lettertile';
 
+enum KEY_CODE {
+  RIGHT_ARROW = 39,
+  LEFT_ARROW = 37,
+  UP_ARROW = 38,
+  DOWN_ARROW = 40
+}
+
 @Component({
   selector: 'app-board',
   templateUrl: './board.component.html',
@@ -15,10 +22,27 @@ export class BoardComponent implements OnInit {
   gridcells: GridCell[];
   letters: LetterTile[];
 
-  @HostListener('window:keyup', ['$event'])
+  @HostListener('window:keydown', ['$event'])
   keyEvent(event: KeyboardEvent) {
-    console.log('event: ', event);
-    this.letters.push(new LetterTile(this.selectedRowIndex + 1, this.selectedColIndex + 1, String.fromCharCode(event.keyCode)));
+    if (event.keyCode === KEY_CODE.RIGHT_ARROW) {
+      if (this.selectedColIndex < 14) {
+        this.selectedColIndex++;
+      }
+    } else if (event.keyCode === KEY_CODE.LEFT_ARROW) {
+      if (this.selectedColIndex > 0) {
+        this.selectedColIndex--;
+      }
+    } else if (event.keyCode === KEY_CODE.DOWN_ARROW) {
+      if (this.selectedRowIndex < 14) {
+        this.selectedRowIndex++;
+      }
+    } else if (event.keyCode === KEY_CODE.UP_ARROW) {
+      if (this.selectedRowIndex > 0) {
+        this.selectedRowIndex--;
+      }
+    }  else {
+      this.letters.push(new LetterTile(this.selectedRowIndex + 1, this.selectedColIndex + 1, String.fromCharCode(event.keyCode)));
+    }
   }
 
   constructor() {
@@ -52,7 +76,7 @@ export class BoardComponent implements OnInit {
         i++;
       }
     }
-   }
+  }
 
   ngOnInit() {
   }
