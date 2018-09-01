@@ -27,6 +27,9 @@
           <br>
       </div>
       <button class="form-control" (click)="speel()">Speel</button>
+      <br>
+      <br>
+      <div class="error" *ngFor="let error of errors">{{error}}</div>
     </div>
   </div>
 </div>
