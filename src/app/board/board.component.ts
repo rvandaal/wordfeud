@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, HostListener } from '@angular/core';
+import { Component, OnInit, Input, HostListener, Output, EventEmitter } from '@angular/core';
 import { GridCell, CellType } from '../gridcell';
 import { LetterTile } from '../lettertile';
 
@@ -20,7 +20,18 @@ export class BoardComponent implements OnInit {
   selectedRowIndex: number;
 
   gridcells: GridCell[];
-  letters: LetterTile[];
+  committedLetters: LetterTile[];
+  placedLetters: LetterTile[];
+
+  get allLetters() {
+    return [...this.committedLetters, ...this.placedLetters];
+  }
+
+  @Output()
+  letterPlaced = new EventEmitter<LetterTile>();
+
+  @Output()
+  placedLettersCleared = new EventEmitter();
 
   @HostListener('window:keydown', ['$event'])
   keyEvent(event: KeyboardEvent) {
@@ -41,7 +52,9 @@ export class BoardComponent implements OnInit {
         this.selectedRowIndex--;
       }
     }  else {
-      this.letters.push(new LetterTile(this.selectedRowIndex + 1, this.selectedColIndex + 1, String.fromCharCode(event.keyCode)));
+      const newLetterTile = new LetterTile(this.selectedRowIndex + 1, this.selectedColIndex + 1, String.fromCharCode(event.keyCode));
+      this.placedLetters.push(newLetterTile);
+      this.letterPlaced.emit(newLetterTile);
     }
   }
 
@@ -51,7 +64,8 @@ export class BoardComponent implements OnInit {
     const celldefs_dw = [32, 42, 52, 64, 70, 108, 116, 154, 160, 172, 182, 192];
     const celldefs_tw = [4, 10, 60, 74, 150, 164, 214, 220];
     this.gridcells = [];
-    this.letters = [];
+    this.committedLetters = [];
+    this.placedLetters = [];
     let i = 0;
     for (let row = 0; row < 15; row++) {
       for (let col = 0; col < 15; col++) {
@@ -69,16 +83,18 @@ export class BoardComponent implements OnInit {
         }
 
         this.gridcells.push(new GridCell(row, col, type));
-
-        // if (col === 5 && row > 6 && row < 12) {
-        //   this.letters.push(new LetterTile(row, col, 'A'));
-        // }
         i++;
       }
     }
   }
 
   ngOnInit() {
+  }
+
+  public commitPlacedLetters() {
+    this.committedLetters = this.allLetters;
+    this.allLetters.forEach(t => t.new = false);
+    this.clearPlacedLetters();
   }
 
   public onClick(cell: GridCell) {
@@ -88,6 +104,11 @@ export class BoardComponent implements OnInit {
 
   isSelected(cell: GridCell) {
     return cell.col === this.selectedColIndex && cell.row === this.selectedRowIndex;
+  }
+
+  private clearPlacedLetters() {
+    this.placedLetters = [];
+    this.placedLettersCleared.emit();
   }
 
 }

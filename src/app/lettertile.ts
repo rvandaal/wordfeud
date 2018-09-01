@@ -1,12 +1,14 @@
 export class LetterTile {
-    row: number;
-    col: number;
-    letter: string;
+    public row: number;
+    public col: number;
+    public letter: string;
+    public new: boolean;
 
     constructor(row: number, col: number, letter: string) {
         this.row = row;
         this.col = col;
         this.letter = letter;
+        this.new = true;
     }
 
     get value(): number {

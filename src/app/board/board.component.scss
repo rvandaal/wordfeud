@@ -86,11 +86,15 @@
     padding: 1px 3px 0 0;
     border: 1px solid #191a1d;
     border-radius: 4px;
-    background: #eeec9b;
+    background: white;
     color: #32301b;
     font-weight: 600;
     font-size: 30px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+  }
+
+  .new {
+    background: #eeec9b;
   }
 
   .lettervalue {

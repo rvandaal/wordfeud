@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
+import { BoardComponent } from './board/board.component';
+import { Component, ViewChild, AfterViewInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
+import { Player } from './player';
+import { LetterTile } from './lettertile';
 
 enum State {
   inputPlayers,
@@ -13,9 +16,16 @@ enum State {
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
+
+  @ViewChild(BoardComponent)board: BoardComponent;
+
+  private placedLetters: LetterTile[];
+
   public State = State;
   public state: State;
   public form: FormGroup;
+  public players: Player[];
+  public activePlayer: Player;
 
   constructor() {
     this.state = State.inputPlayers;
@@ -27,10 +37,27 @@ export class AppComponent {
   }
 
   startGame() {
+    this.players = [new Player(this.form.get('player1Name').value), new Player(this.form.get('player2Name').value)];
     if (this.form.get('startPlayer').value === '1') {
       this.state = State.player1;
+      this.activePlayer = this.players[0];
     } else {
       this.state = State.player2;
+      this.activePlayer = this.players[1];
     }
+    this.placedLetters = [];
+  }
+
+  onLetterPlaced(letterTile: LetterTile) {
+    this.placedLetters.push(letterTile);
+  }
+
+  onPlacedLettersCleared() {
+    this.placedLetters = [];
+  }
+
+  speel() {
+    // validateletters
+    this.board.commitPlacedLetters();
   }
 }
