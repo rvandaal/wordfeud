@@ -5,7 +5,7 @@
         (click)="onClick(cell)">{{cell.type !== 'M' ? cell.type : '*'}}</div>
     </div>
     <div class="grid noevent">
-      <div class="letter" *ngFor="let letter of allLetters" 
+      <div class="letter" *ngFor="let letter of letters" 
         [ngClass]="{'new': letter.new}" [style.grid-row-start]="letter.cell.row + 1" [style.grid-column-start]="letter.cell.col + 1">
         {{letter.letter}}
         <div class="lettervalue">{{letter.value}}</div>

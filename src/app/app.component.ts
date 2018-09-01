@@ -17,15 +17,19 @@ enum State {
 })
 export class AppComponent {
 
-  @ViewChild(BoardComponent)board: BoardComponent;
-
-  private placedLetters: LetterTile[];
+  @ViewChild(BoardComponent) board: BoardComponent;
 
   public State = State;
   public state: State;
   public form: FormGroup;
   public players: Player[];
   public activePlayer: Player;
+  public committedLetters: LetterTile[];
+  public placedLetters: LetterTile[];
+
+  get allLetters() {
+    return [...this.committedLetters, ...this.placedLetters];
+  }
 
   constructor() {
     this.state = State.inputPlayers;
@@ -34,6 +38,8 @@ export class AppComponent {
       player2Name: new FormControl(),
       startPlayer: new FormControl('1')
     });
+    this.committedLetters = [];
+    this.placedLetters = [];
   }
 
   startGame() {
@@ -52,12 +58,14 @@ export class AppComponent {
     this.placedLetters.push(letterTile);
   }
 
-  onPlacedLettersCleared() {
-    this.placedLetters = [];
-  }
-
   speel() {
     // validateletters
-    this.board.commitPlacedLetters();
+    this.commitPlacedLetters();
+  }
+
+  private commitPlacedLetters() {
+    this.committedLetters = this.allLetters;
+    this.allLetters.forEach(t => t.new = false);
+    this.placedLetters = [];
   }
 }
