@@ -1,11 +1,12 @@
 <div class="gridcontainer">
     <div class="grid">
       <div class="cell" *ngFor="let cell of gridcells" 
-      [ngClass]="{'selected': isSelected(cell), 'M': cell.type === 'M', 'DL': cell.type === 'DL', 'TL': cell.type === 'TL', 'DW': cell.type === 'DW', 'TW': cell.type === 'TW'}"
+      [ngClass]="{'selected': cell === selectedGridCell, 'M': cell.type === 'M', 'DL': cell.type === 'DL', 'TL': cell.type === 'TL', 'DW': cell.type === 'DW', 'TW': cell.type === 'TW'}"
         (click)="onClick(cell)">{{cell.type !== 'M' ? cell.type : '*'}}</div>
     </div>
     <div class="grid noevent">
-      <div class="letter" *ngFor="let letter of allLetters" [ngClass]="{'new': letter.new}" [style.grid-row-start]="letter.row" [style.grid-column-start]="letter.col">
+      <div class="letter" *ngFor="let letter of allLetters" 
+        [ngClass]="{'new': letter.new}" [style.grid-row-start]="letter.cell.row + 1" [style.grid-column-start]="letter.cell.col + 1">
         {{letter.letter}}
         <div class="lettervalue">{{letter.value}}</div>
       </div>

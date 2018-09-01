@@ -1,14 +1,13 @@
+import { GridCell } from './gridcell';
 export class LetterTile {
-    public row: number;
-    public col: number;
     public letter: string;
     public new: boolean;
+    public cell: GridCell;
 
-    constructor(row: number, col: number, letter: string) {
-        this.row = row;
-        this.col = col;
+    constructor(letter: string, cell: GridCell) {
         this.letter = letter;
         this.new = true;
+        this.cell = cell;
     }
 
     get value(): number {

@@ -16,8 +16,7 @@ enum KEY_CODE {
 })
 export class BoardComponent implements OnInit {
 
-  selectedColIndex: number;
-  selectedRowIndex: number;
+  selectedGridCell: GridCell;
 
   gridcells: GridCell[];
   committedLetters: LetterTile[];
@@ -36,23 +35,23 @@ export class BoardComponent implements OnInit {
   @HostListener('window:keydown', ['$event'])
   keyEvent(event: KeyboardEvent) {
     if (event.keyCode === KEY_CODE.RIGHT_ARROW) {
-      if (this.selectedColIndex < 14) {
-        this.selectedColIndex++;
+      if (this.selectedGridCell.col < 14) {
+        this.selectCell(this.selectedGridCell.row, this.selectedGridCell.col + 1);
       }
     } else if (event.keyCode === KEY_CODE.LEFT_ARROW) {
-      if (this.selectedColIndex > 0) {
-        this.selectedColIndex--;
+      if (this.selectedGridCell.col > 0) {
+        this.selectCell(this.selectedGridCell.row, this.selectedGridCell.col - 1);
       }
     } else if (event.keyCode === KEY_CODE.DOWN_ARROW) {
-      if (this.selectedRowIndex < 14) {
-        this.selectedRowIndex++;
+      if (this.selectedGridCell.row < 14) {
+        this.selectCell(this.selectedGridCell.row + 1, this.selectedGridCell.col);
       }
     } else if (event.keyCode === KEY_CODE.UP_ARROW) {
-      if (this.selectedRowIndex > 0) {
-        this.selectedRowIndex--;
+      if (this.selectedGridCell.row > 0) {
+        this.selectCell(this.selectedGridCell.row - 1, this.selectedGridCell.col);
       }
     }  else {
-      const newLetterTile = new LetterTile(this.selectedRowIndex + 1, this.selectedColIndex + 1, String.fromCharCode(event.keyCode));
+      const newLetterTile = new LetterTile(String.fromCharCode(event.keyCode), this.selectedGridCell);
       this.placedLetters.push(newLetterTile);
       this.letterPlaced.emit(newLetterTile);
     }
@@ -98,12 +97,7 @@ export class BoardComponent implements OnInit {
   }
 
   public onClick(cell: GridCell) {
-    this.selectedColIndex = cell.col;
-    this.selectedRowIndex = cell.row;
-  }
-
-  isSelected(cell: GridCell) {
-    return cell.col === this.selectedColIndex && cell.row === this.selectedRowIndex;
+    this.selectedGridCell = cell;
   }
 
   private clearPlacedLetters() {
@@ -111,4 +105,11 @@ export class BoardComponent implements OnInit {
     this.placedLettersCleared.emit();
   }
 
+  private getCell(row: number, col: number) {
+    return this.gridcells.filter(c => c.row === row && c.col === col)[0];
+  }
+
+  private selectCell(row: number, col: number) {
+    this.selectedGridCell = this.getCell(row, col);
+  }
 }
