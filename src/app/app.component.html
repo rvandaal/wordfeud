@@ -26,7 +26,9 @@
           <div class="player-name" [ngClass]="{'selected': player === activePlayer}">{{player.name}}, score: {{player.score}}</div>
           <br>
       </div>
-      <button class="form-control" (click)="speel()">Speel</button>
+      <button class="form-control" (click)="play()">Speel</button>
+      <br>
+      <button class="form-control" (click)="clearPlacedLetters()">Wis</button>
       <br>
       <br>
       <div class="error" *ngFor="let error of errors">{{error}}</div>

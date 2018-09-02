@@ -60,7 +60,7 @@ export class AppComponent {
     this.placedLetters.push(letterTile);
   }
 
-  speel() {
+  play() {
     const result = this.validatePlacedLetters();
     if (result.length) {
       this.errors = result;
@@ -68,6 +68,10 @@ export class AppComponent {
       this.commitPlacedLetters();
       this.errors = [];
     }
+  }
+
+  clearPlacedLetters() {
+    this.placedLetters = [];
   }
 
   private validatePlacedLetters(): string[] {
@@ -86,7 +90,7 @@ export class AppComponent {
   private validateOneDimension(): string {
     const firstPlacedLetter = this.placedLetters[0];
     const onOneLine = _.every(this.placedLetters, l => l.cell.col === firstPlacedLetter.cell.col) ||
-            _.every(this.placedLetters, l => l.cell.row === firstPlacedLetter.cell.row);
+      _.every(this.placedLetters, l => l.cell.row === firstPlacedLetter.cell.row);
     if (onOneLine !== true) {
       return 'Alle geplaatste letters moeten op 1 lijn liggen!';
     }
@@ -100,28 +104,49 @@ export class AppComponent {
     let error: boolean;
     let i = 0;
 
-    if(!connectedLetters.length) {
-      return null;
+    if (!connectedLetters.length) {
+      while (lettersToCheck.length && i < 7 && !error) {
+        let someLetterConnected = false;
+        lettersToCheck.forEach(ltc => {
+          console.log(ltc);
+          if (
+            !connectedLetters.length && ltc.cell.row === 7 && ltc.cell.col === 7 ||
+            _.some(connectedLetters, cl => connectedLetters.length && this.isLetterNextToOtherLetter(all, ltc, cl))
+          ) {
+            connectedLetters.push(ltc);
+            const j = lettersToCheck.indexOf(ltc);
+            lettersToCheck.splice(j, 1);
+            someLetterConnected = true;
+          }
+        });
+        // if(someLetterConnected !== true) {
+        //   error = true;
+        // } else {
+        //   continue;
+        // }
+        i++;
+      }
+      return lettersToCheck.length > 0 || error ? 'Het eerste woord moet door het midden gaan!' : null;
+    } else {
+      while (lettersToCheck.length && i < 7 && !error) {
+        let someLetterConnected = false;
+        lettersToCheck.forEach(ltc => {
+          if (_.some(connectedLetters, cl => this.isLetterNextToOtherLetter(all, ltc, cl))) {
+            connectedLetters.push(ltc);
+            const j = lettersToCheck.indexOf(ltc);
+            lettersToCheck.splice(j, 1);
+            someLetterConnected = true;
+          }
+        });
+        // if(someLetterConnected !== true) {
+        //   error = true;
+        // } else {
+        //   continue;
+        // }
+        i++;
+      }
+      return lettersToCheck.length > 0 || error ? 'Alle letters moeten aansluiten op de bestaande letters!' : null;
     }
-
-    while (lettersToCheck.length && i < 7 && !error) {
-      let someLetterConnected = false;
-      lettersToCheck.forEach(ltc => {
-        if (_.some(connectedLetters, cl => this.isLetterNextToOtherLetter(all, ltc, cl))) {
-          connectedLetters.push(ltc);
-          const j = lettersToCheck.indexOf(ltc);
-          lettersToCheck.splice(j, 1);
-          someLetterConnected = true;
-        }
-      });
-      // if(someLetterConnected !== true) {
-      //   error = true;
-      // } else {
-      //   continue;
-      // }
-      i++;
-    }
-    return lettersToCheck.length > 0 || error ? 'Alle letters moeten aansluiten op de bestaande letters!' : null;
   }
 
   private isLetterNextToOtherLetter(letters: LetterTile[], letter1: LetterTile, letter2: LetterTile) {
