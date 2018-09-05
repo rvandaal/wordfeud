@@ -28,4 +28,8 @@ export class Word {
     public get length() {
         return this.letters.length;
     }
+
+    public highlight() {
+        this.letters.forEach(l => l.isHighlighted = true);
+    }
 }

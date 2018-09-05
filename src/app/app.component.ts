@@ -174,30 +174,29 @@ export class AppComponent {
 
   private commitPlacedLetters() {
     this.committedLetters = this.allLetters;
-    this.allLetters.forEach(t => { t.isNew = false; t.isMarkedForScore = false; });
+    this.allLetters.forEach(t => { t.isNew = false; t.isHighlighted = false; });
     this.placedLetters = [];
     this.activePlayer.score += this.currentScore;
   }
 
   private highlightLettersForScore() {
-    const lettersForScore = [...this.placedLetters];
     this.newWords = [];
-    this.placedLetters.forEach(l => this.highlightLettersForScoreForPlacedLetter(l, lettersForScore, this.newWords));
-    lettersForScore.forEach(l => l.isMarkedForScore = true);
+    this.placedLetters.forEach(l => this.highlightLettersForScoreForPlacedLetter(l, this.newWords));
     this.currentScore = this.newWords.reduce((acc, cur) => acc + cur.score, 0);
+    this.newWords.forEach(w => w.highlight());
     this.log('new words: ', this.newWords);
   }
 
-  private highlightLettersForScoreForPlacedLetter(letter: LetterTile, lettersForScore: LetterTile[], newWords: Word[]) {
+  private highlightLettersForScoreForPlacedLetter(letter: LetterTile, newWords: Word[]) {
     this.log('placed letter: ', letter.letter);
     this.log('search left');
-    const leftWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, -1, 0);
+    const leftWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, -1, 0);
     this.log('search right');
-    const rightWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, 1, 0);
+    const rightWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, 1, 0);
     this.log('search top');
-    const topWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, 0, -1);
+    const topWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, 0, -1);
     this.log('search bottom');
-    const bottomWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, 0, 1);
+    const bottomWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, 0, 1);
 
     const horizontalWord: Word = new Word([...leftWordpart, ...[letter], ...rightWordpart]);
     const verticalWord: Word = new Word([...topWordpart, ...[letter], ...bottomWordpart]);
@@ -211,7 +210,6 @@ export class AppComponent {
 
   private highlightLettersForScoreForPlacedLetterInOneDirection(
     letter: LetterTile,
-    lettersForScore: LetterTile[],
     colDelta: number,
     rowDelta: number
   ): LetterTile[] {
@@ -221,9 +219,6 @@ export class AppComponent {
     this.log('r: ', r, ', c: ', c);
     let currentLetter = this.getLetter(this.allLetters, r, c);
     while (currentLetter != null) {
-      if (!lettersForScore.includes(currentLetter)) {
-        lettersForScore.push(currentLetter);
-      }
       if (colDelta === 1 || rowDelta === 1) {
         wordpart.push(currentLetter);
       } else {
