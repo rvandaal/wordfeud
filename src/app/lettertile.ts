@@ -1,13 +1,13 @@
-import { GridCell } from './gridcell';
+import { GridCell, CellType } from './gridcell';
 export class LetterTile {
     public letter: string;
-    public new: boolean;
+    public isNew: boolean;
     public cell: GridCell;
     public isMarkedForScore: boolean;
 
     constructor(letter: string, cell: GridCell) {
         this.letter = letter;
-        this.new = true;
+        this.isNew = true;
         this.cell = cell;
     }
 
@@ -34,5 +34,9 @@ export class LetterTile {
             return 10;
         }
         return 0;
+    }
+
+    get score() {
+        return this.value * (this.isNew && this.cell.type === CellType.TL ? 3 : (this.isNew && this.cell.type === CellType.DL ? 2 : 1));
     }
 }

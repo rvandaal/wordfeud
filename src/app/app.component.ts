@@ -4,6 +4,7 @@ import { FormGroup, FormControl } from '@angular/forms';
 import { Player } from './player';
 import { LetterTile } from './lettertile';
 import * as _ from 'lodash';
+import { Word } from './word';
 
 enum State {
   inputPlayers,
@@ -29,20 +30,14 @@ export class AppComponent {
   public placedLetters: LetterTile[];
   public errors: string[];
   public currentScore: number;
-  public newWords: LetterTile[][] = [];
+  public newWords: Word[] = [];
 
   get allLetters() {
     return [...this.committedLetters, ...this.placedLetters];
   }
 
   get newWordStrings(): string[] {
-    const result: string[] = [];
-    this.newWords.forEach(w => {
-      let s = '';
-      w.forEach(l => s += l.letter);
-      result.push(s);
-    });
-    return result;
+    return this.newWords.map(w => w.toString());
   }
 
   constructor() {
@@ -179,7 +174,7 @@ export class AppComponent {
 
   private commitPlacedLetters() {
     this.committedLetters = this.allLetters;
-    this.allLetters.forEach(t => { t.new = false; t.isMarkedForScore = false; });
+    this.allLetters.forEach(t => { t.isNew = false; t.isMarkedForScore = false; });
     this.placedLetters = [];
     this.activePlayer.score += this.currentScore;
   }
@@ -189,11 +184,11 @@ export class AppComponent {
     this.newWords = [];
     this.placedLetters.forEach(l => this.highlightLettersForScoreForPlacedLetter(l, lettersForScore, this.newWords));
     lettersForScore.forEach(l => l.isMarkedForScore = true);
-    this.currentScore = lettersForScore.reduce((acc, cur) => acc + cur.value, 0);
+    this.currentScore = this.newWords.reduce((acc, cur) => acc + cur.score, 0);
     this.log('new words: ', this.newWords);
   }
 
-  private highlightLettersForScoreForPlacedLetter(letter: LetterTile, lettersForScore: LetterTile[], newWords: LetterTile[][]) {
+  private highlightLettersForScoreForPlacedLetter(letter: LetterTile, lettersForScore: LetterTile[], newWords: Word[]) {
     this.log('placed letter: ', letter.letter);
     this.log('search left');
     const leftWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, -1, 0);
@@ -204,12 +199,12 @@ export class AppComponent {
     this.log('search bottom');
     const bottomWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, 0, 1);
 
-    const horizontalWord: LetterTile[] = [...leftWordpart, ...[letter], ...rightWordpart];
-    const verticalWord: LetterTile[] = [...topWordpart, ...[letter], ...bottomWordpart];
-    if (horizontalWord.length > 1 && !this.newWordStrings.includes(this.getWordString(horizontalWord))) {
+    const horizontalWord: Word = new Word([...leftWordpart, ...[letter], ...rightWordpart]);
+    const verticalWord: Word = new Word([...topWordpart, ...[letter], ...bottomWordpart]);
+    if (horizontalWord.length > 1 && !this.newWordStrings.includes(horizontalWord.toString())) {
       newWords.push(horizontalWord);
     }
-    if (verticalWord.length > 1 && !this.newWordStrings.includes(this.getWordString(verticalWord))) {
+    if (verticalWord.length > 1 && !this.newWordStrings.includes(verticalWord.toString())) {
       newWords.push(verticalWord);
     }
   }
@@ -239,7 +234,6 @@ export class AppComponent {
       this.log('r: ', r, ', c: ', c);
       currentLetter = this.getLetter(this.allLetters, r, c);
     }
-    this.log('wordpart: ', this.getWordString(wordpart));
     return wordpart;
   }
 
@@ -250,9 +244,4 @@ export class AppComponent {
   private log(text: string, ...optionalParams: any[]) {
     //console.log(text, ...optionalParams);
   }
-
-  private getWordString(word: LetterTile[]) {
-    return word.map(l => l.letter).join('');
-  }
-
 }
