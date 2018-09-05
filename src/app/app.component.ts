@@ -29,9 +29,20 @@ export class AppComponent {
   public placedLetters: LetterTile[];
   public errors: string[];
   public currentScore: number;
+  public newWords: LetterTile[][] = [];
 
   get allLetters() {
     return [...this.committedLetters, ...this.placedLetters];
+  }
+
+  get newWordStrings(): string[] {
+    const result: string[] = [];
+    this.newWords.forEach(w => {
+      let s = '';
+      w.forEach(l => s += l.letter);
+      result.push(s);
+    });
+    return result;
   }
 
   constructor() {
@@ -69,6 +80,7 @@ export class AppComponent {
     } else {
       this.commitPlacedLetters();
       this.errors = [];
+      this.nextPlayer();
     }
   }
 
@@ -174,16 +186,32 @@ export class AppComponent {
 
   private highlightLettersForScore() {
     const lettersForScore = [...this.placedLetters];
-    this.placedLetters.forEach(l => this.highlightLettersForScoreForPlacedLetter(l, lettersForScore));
+    this.newWords = [];
+    this.placedLetters.forEach(l => this.highlightLettersForScoreForPlacedLetter(l, lettersForScore, this.newWords));
     lettersForScore.forEach(l => l.isMarkedForScore = true);
     this.currentScore = lettersForScore.reduce((acc, cur) => acc + cur.value, 0);
+    this.log('new words: ', this.newWords);
   }
 
-  private highlightLettersForScoreForPlacedLetter(letter: LetterTile, lettersForScore: LetterTile[]) {
-    this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, -1, 0);
-    this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, 1, 0);
-    this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, 0, -1);
-    this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, 0, 1);
+  private highlightLettersForScoreForPlacedLetter(letter: LetterTile, lettersForScore: LetterTile[], newWords: LetterTile[][]) {
+    this.log('placed letter: ', letter.letter);
+    this.log('search left');
+    const leftWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, -1, 0);
+    this.log('search right');
+    const rightWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, 1, 0);
+    this.log('search top');
+    const topWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, 0, -1);
+    this.log('search bottom');
+    const bottomWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, 0, 1);
+
+    const horizontalWord: LetterTile[] = [...leftWordpart, ...[letter], ...rightWordpart];
+    const verticalWord: LetterTile[] = [...topWordpart, ...[letter], ...bottomWordpart];
+    if (horizontalWord.length > 1 && !this.newWordStrings.includes(this.getWordString(horizontalWord))) {
+      newWords.push(horizontalWord);
+    }
+    if (verticalWord.length > 1 && !this.newWordStrings.includes(this.getWordString(verticalWord))) {
+      newWords.push(verticalWord);
+    }
   }
 
   private highlightLettersForScoreForPlacedLetterInOneDirection(
@@ -191,18 +219,40 @@ export class AppComponent {
     lettersForScore: LetterTile[],
     colDelta: number,
     rowDelta: number
-  ) {
+  ): LetterTile[] {
+    let wordpart: LetterTile[] = [];
     let c = letter.cell.col + colDelta;
     let r = letter.cell.row + rowDelta;
+    this.log('r: ', r, ', c: ', c);
     let currentLetter = this.getLetter(this.allLetters, r, c);
     while (currentLetter != null) {
       if (!lettersForScore.includes(currentLetter)) {
         lettersForScore.push(currentLetter);
       }
+      if (colDelta === 1 || rowDelta === 1) {
+        wordpart.push(currentLetter);
+      } else {
+        wordpart = [currentLetter, ...wordpart];
+      }
       c += colDelta;
       r += rowDelta;
+      this.log('r: ', r, ', c: ', c);
       currentLetter = this.getLetter(this.allLetters, r, c);
     }
+    this.log('wordpart: ', this.getWordString(wordpart));
+    return wordpart;
+  }
+
+  private nextPlayer() {
+    this.activePlayer = this.activePlayer === this.players[0] ? this.players[1] : this.players[0];
+  }
+
+  private log(text: string, ...optionalParams: any[]) {
+    //console.log(text, ...optionalParams);
+  }
+
+  private getWordString(word: LetterTile[]) {
+    return word.map(l => l.letter).join('');
   }
 
 }

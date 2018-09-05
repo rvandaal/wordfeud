@@ -30,6 +30,9 @@
       <span>Current score for placement: {{currentScore}}</span>
       <br>
       <br>
+      <span>Placed words:</span>
+      <br>
+      <div *ngFor="let newWord of newWordStrings">{{newWord}}</div>
       <br>
       <button class="form-control" (click)="play()">Speel</button>
       <br>
