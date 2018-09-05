@@ -26,6 +26,11 @@
           <div class="player-name" [ngClass]="{'selected': player === activePlayer}">{{player.name}}, score: {{player.score}}</div>
           <br>
       </div>
+      <br>
+      <span>Current score for placement: {{currentScore}}</span>
+      <br>
+      <br>
+      <br>
       <button class="form-control" (click)="play()">Speel</button>
       <br>
       <button class="form-control" (click)="clearPlacedLetters()">Wis</button>

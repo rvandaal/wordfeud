@@ -28,6 +28,7 @@ export class AppComponent {
   public committedLetters: LetterTile[];
   public placedLetters: LetterTile[];
   public errors: string[];
+  public currentScore: number;
 
   get allLetters() {
     return [...this.committedLetters, ...this.placedLetters];
@@ -58,6 +59,7 @@ export class AppComponent {
 
   onLetterPlaced(letterTile: LetterTile) {
     this.placedLetters.push(letterTile);
+    this.highlightLettersForScore();
   }
 
   play() {
@@ -108,7 +110,6 @@ export class AppComponent {
       while (lettersToCheck.length && i < 7 && !error) {
         let someLetterConnected = false;
         lettersToCheck.forEach(ltc => {
-          console.log(ltc);
           if (
             !connectedLetters.length && ltc.cell.row === 7 && ltc.cell.col === 7 ||
             _.some(connectedLetters, cl => connectedLetters.length && this.isLetterNextToOtherLetter(all, ltc, cl))
@@ -166,7 +167,42 @@ export class AppComponent {
 
   private commitPlacedLetters() {
     this.committedLetters = this.allLetters;
-    this.allLetters.forEach(t => t.new = false);
+    this.allLetters.forEach(t => { t.new = false; t.isMarkedForScore = false; });
     this.placedLetters = [];
+    this.activePlayer.score += this.currentScore;
   }
+
+  private highlightLettersForScore() {
+    const lettersForScore = [...this.placedLetters];
+    this.placedLetters.forEach(l => this.highlightLettersForScoreForPlacedLetter(l, lettersForScore));
+    lettersForScore.forEach(l => l.isMarkedForScore = true);
+    this.currentScore = lettersForScore.reduce((acc, cur) => acc + cur.value, 0);
+  }
+
+  private highlightLettersForScoreForPlacedLetter(letter: LetterTile, lettersForScore: LetterTile[]) {
+    this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, -1, 0);
+    this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, 1, 0);
+    this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, 0, -1);
+    this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, lettersForScore, 0, 1);
+  }
+
+  private highlightLettersForScoreForPlacedLetterInOneDirection(
+    letter: LetterTile,
+    lettersForScore: LetterTile[],
+    colDelta: number,
+    rowDelta: number
+  ) {
+    let c = letter.cell.col + colDelta;
+    let r = letter.cell.row + rowDelta;
+    let currentLetter = this.getLetter(this.allLetters, r, c);
+    while (currentLetter != null) {
+      if (!lettersForScore.includes(currentLetter)) {
+        lettersForScore.push(currentLetter);
+      }
+      c += colDelta;
+      r += rowDelta;
+      currentLetter = this.getLetter(this.allLetters, r, c);
+    }
+  }
+
 }

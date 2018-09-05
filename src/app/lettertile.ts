@@ -3,6 +3,7 @@ export class LetterTile {
     public letter: string;
     public new: boolean;
     public cell: GridCell;
+    public isMarkedForScore: boolean;
 
     constructor(letter: string, cell: GridCell) {
         this.letter = letter;
