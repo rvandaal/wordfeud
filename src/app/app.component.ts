@@ -12,6 +12,11 @@ enum State {
   player2
 }
 
+class WordScore {
+  constructor(public word: string, public score: number) {
+  }
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -36,8 +41,8 @@ export class AppComponent {
     return [...this.committedLetters, ...this.placedLetters];
   }
 
-  get newWordStrings(): string[] {
-    return this.newWords.map(w => w.toString());
+  get newWordStrings(): WordScore[] {
+    return this.newWords.map(w => new WordScore(w.toString(), w.score));
   }
 
   constructor() {
@@ -65,7 +70,7 @@ export class AppComponent {
 
   onLetterPlaced(letterTile: LetterTile) {
     this.placedLetters.push(letterTile);
-    this.highlightLettersForScore();
+    this.determineNewWords();
   }
 
   play() {
@@ -179,32 +184,35 @@ export class AppComponent {
     this.activePlayer.score += this.currentScore;
   }
 
-  private highlightLettersForScore() {
+  private determineNewWords() {
     this.newWords = [];
-    this.placedLetters.forEach(l => this.highlightLettersForScoreForPlacedLetter(l, this.newWords));
+    this.placedLetters.forEach(l => this.determineNewWordsWithPlacedLetter(l, this.newWords));
     this.currentScore = this.newWords.reduce((acc, cur) => acc + cur.score, 0);
     this.newWords.forEach(w => w.highlight());
     this.log('new words: ', this.newWords);
   }
 
-  private highlightLettersForScoreForPlacedLetter(letter: LetterTile, newWords: Word[]) {
+  private determineNewWordsWithPlacedLetter(letter: LetterTile, newWords: Word[]) {
     this.log('placed letter: ', letter.letter);
-    this.log('search left');
-    const leftWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, -1, 0);
-    this.log('search right');
-    const rightWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, 1, 0);
-    this.log('search top');
-    const topWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, 0, -1);
-    this.log('search bottom');
-    const bottomWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, 0, 1);
-
-    const horizontalWord: Word = new Word([...leftWordpart, ...[letter], ...rightWordpart]);
-    const verticalWord: Word = new Word([...topWordpart, ...[letter], ...bottomWordpart]);
-    if (horizontalWord.length > 1 && !this.newWordStrings.includes(horizontalWord.toString())) {
-      newWords.push(horizontalWord);
+    if (!_.some(newWords, w => w.isHorizontal() && w.containsLetter(letter))) {
+      this.log('search left');
+      const leftWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, -1, 0);
+      this.log('search right');
+      const rightWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, 1, 0);
+      const horizontalWord: Word = new Word([...leftWordpart, letter, ...rightWordpart]);
+      if (horizontalWord.length > 1) {
+        newWords.push(horizontalWord);
+      }
     }
-    if (verticalWord.length > 1 && !this.newWordStrings.includes(verticalWord.toString())) {
-      newWords.push(verticalWord);
+    if (!_.some(newWords, w => !w.isHorizontal() && w.containsLetter(letter))) {
+      this.log('search top');
+      const topWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, 0, -1);
+      this.log('search bottom');
+      const bottomWordpart = this.highlightLettersForScoreForPlacedLetterInOneDirection(letter, 0, 1);
+      const verticalWord: Word = new Word([...topWordpart, letter, ...bottomWordpart]);
+      if (verticalWord.length > 1) {
+        newWords.push(verticalWord);
+      }
     }
   }
 

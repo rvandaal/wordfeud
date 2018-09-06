@@ -27,12 +27,12 @@
           <br>
       </div>
       <br>
-      <span>Current score for placement: {{currentScore}}</span>
+      <span *ngIf="currentScore">Huidige score voor deze beurt: {{currentScore}} punten</span>
       <br>
       <br>
-      <span>Placed words:</span>
+      <span>Geplaatste woorden:</span>
       <br>
-      <div *ngFor="let newWord of newWordStrings">{{newWord}}</div>
+      <div *ngFor="let newWord of newWordStrings">{{newWord.word}}: {{newWord.score}} punten</div>
       <br>
       <button class="form-control" (click)="play()">Speel</button>
       <br>

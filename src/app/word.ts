@@ -32,4 +32,12 @@ export class Word {
     public highlight() {
         this.letters.forEach(l => l.isHighlighted = true);
     }
+
+    public isHorizontal() {
+        return this.letters[0].cell.row === this.letters[this.length - 1].cell.row;
+    }
+
+    public containsLetter(letter: LetterTile) {
+        return this.letters.includes(letter);
+    }
 }
