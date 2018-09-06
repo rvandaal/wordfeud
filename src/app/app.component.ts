@@ -1,10 +1,15 @@
 import { BoardComponent } from './board/board.component';
-import { Component, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, Inject, PLATFORM_ID, OnDestroy } from '@angular/core';
+import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Player } from './player';
 import { LetterTile } from './lettertile';
 import * as _ from 'lodash';
 import { Word } from './word';
+
+// https://hackernoon.com/import-json-into-typescript-8d465beded79
+// import * as worddata from './words.json'; // dit kunnen we doen als de hele woordenlijst compleet is.
+// We kunnen namelijk niet terugschrijven naar deze json.
 
 enum State {
   inputPlayers,
@@ -22,7 +27,7 @@ class WordScore {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnDestroy {
 
   @ViewChild(BoardComponent) board: BoardComponent;
 
@@ -37,6 +42,8 @@ export class AppComponent {
   public currentScore: number;
   public newWords: Word[] = [];
 
+  private allWords: string[] = [];
+
   get allLetters() {
     return [...this.committedLetters, ...this.placedLetters];
   }
@@ -45,7 +52,11 @@ export class AppComponent {
     return this.newWords.map(w => new WordScore(w.toString(), w.score));
   }
 
-  constructor() {
+  constructor(
+    // https://www.ryadel.com/en/angular-5-access-window-document-localstorage-browser-types-angular-universal/
+    @Inject(PLATFORM_ID) private platformId: any,
+    @Inject('LOCALSTORAGE') private localStorage: any
+  ) {
     this.state = State.inputPlayers;
     this.form = new FormGroup({
       player1Name: new FormControl('Rob'),
@@ -54,6 +65,11 @@ export class AppComponent {
     });
     this.committedLetters = [];
     this.placedLetters = [];
+    this.loadAllWords();
+  }
+
+  ngOnDestroy() {
+    this.saveAllWords();
   }
 
   startGame() {
@@ -187,9 +203,12 @@ export class AppComponent {
   }
 
   private commitPlacedLetters() {
+    this.allWords = _.orderBy([...this.allWords, ...this.newWordStrings.map(n => n.word)]);
+    this.saveAllWords();
     this.committedLetters = this.allLetters;
     this.allLetters.forEach(t => { t.isNew = false; t.isHighlighted = false; });
     this.placedLetters = [];
+    this.newWords = [];
     this.activePlayer.score += this.currentScore;
   }
 
@@ -254,6 +273,19 @@ export class AppComponent {
   }
 
   private log(text: string, ...optionalParams: any[]) {
-    console.log(text, ...optionalParams);
+    // console.log(text, ...optionalParams);
+  }
+
+  private saveAllWords() {
+    // this.localStorage.setItem('wordfeud_words', JSON.stringify(this.allWords));
+    this.localStorage.setItem('wordfeud_words', this.allWords);
+  }
+
+  private loadAllWords() {
+    // this.allWords = JSON.parse(this.localStorage.getItem('wordfeud_words'));
+    this.allWords = this.localStorage.getItem('wordfeud_words');
+    if (this.allWords == null) {
+      this.allWords = [];
+    }
   }
 }

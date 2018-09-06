@@ -9,7 +9,11 @@ import { WordService } from './word.service';
 @NgModule({
   imports: [BrowserModule, FormsModule, ReactiveFormsModule],
   declarations: [AppComponent, BoardComponent],
-  providers: [WordService],
+  providers: [WordService, { provide: 'LOCALSTORAGE', useFactory: getLocalStorage }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+
+export function getLocalStorage() {
+  return (typeof window !== 'undefined') ? window.localStorage : null;
+}
