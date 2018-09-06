@@ -69,6 +69,11 @@ export class AppComponent {
   }
 
   onLetterPlaced(letterTile: LetterTile) {
+    const existingLetter = this.getLetter(this.placedLetters, letterTile.cell.row, letterTile.cell.col);
+    if (existingLetter) {
+      const index = this.placedLetters.indexOf(existingLetter);
+      this.placedLetters.splice(index, 1);
+    }
     this.placedLetters.push(letterTile);
     this.determineNewWords();
   }
@@ -245,6 +250,6 @@ export class AppComponent {
   }
 
   private log(text: string, ...optionalParams: any[]) {
-    //console.log(text, ...optionalParams);
+    console.log(text, ...optionalParams);
   }
 }
