@@ -19,3 +19,19 @@
   .error {
     color :red;
   }
+
+  .wordlist {
+    height: 800px;
+    margin-right: 50px;    
+    border: 1px solid lightgray;
+
+    .wordlistlabel {
+      margin: 10px;
+    }
+
+    .wordcontainer {
+      height: calc(100% - 44px);
+      overflow-y: auto;
+      padding: 10px;
+    }
+  }

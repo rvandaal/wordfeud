@@ -277,15 +277,14 @@ export class AppComponent implements OnDestroy {
   }
 
   private saveAllWords() {
-    // this.localStorage.setItem('wordfeud_words', JSON.stringify(this.allWords));
-    this.localStorage.setItem('wordfeud_words', this.allWords);
+    this.localStorage.setItem('wordfeud_words', JSON.stringify(this.allWords));
   }
 
   private loadAllWords() {
-    // this.allWords = JSON.parse(this.localStorage.getItem('wordfeud_words'));
-    this.allWords = this.localStorage.getItem('wordfeud_words');
+    this.allWords = JSON.parse(this.localStorage.getItem('wordfeud_words'));
     if (this.allWords == null) {
       this.allWords = [];
     }
+    console.log(this.allWords)
   }
 }
