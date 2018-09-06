@@ -4,14 +4,19 @@ export class LetterTile {
     public isNew: boolean;
     public cell: GridCell;
     public isHighlighted: boolean;
+    public isJoker: boolean;
 
     constructor(letter: string, cell: GridCell) {
         this.letter = letter;
         this.isNew = true;
         this.cell = cell;
+        this.isJoker = false;
     }
 
     get value(): number {
+        if (this.isJoker) {
+            return 0;
+        }
         if (['A', 'E', 'N', 'O'].includes(this.letter)) {
             return 1;
         }

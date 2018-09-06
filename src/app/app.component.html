@@ -27,7 +27,7 @@
           <br>
       </div>
       <br>
-      <span *ngIf="currentScore">Huidige score voor deze beurt: {{currentScore}} punten</span>
+      <span [style.visibility]="currentScore ? 'visible' : 'hidden'">Huidige score voor deze beurt: {{currentScore}} punten</span>
       <br>
       <br>
       <span>Geplaatste woorden:</span>

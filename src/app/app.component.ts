@@ -70,6 +70,10 @@ export class AppComponent {
 
   onLetterPlaced(letterTile: LetterTile) {
     const existingLetter = this.getLetter(this.placedLetters, letterTile.cell.row, letterTile.cell.col);
+    const sameLetter = existingLetter ? existingLetter.letter === letterTile.letter : false;
+    if (sameLetter) {
+      letterTile.isJoker = !existingLetter.isJoker;
+    }
     if (existingLetter) {
       const index = this.placedLetters.indexOf(existingLetter);
       this.placedLetters.splice(index, 1);
