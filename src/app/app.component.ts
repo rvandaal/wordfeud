@@ -1,21 +1,15 @@
 import { BoardComponent } from './board/board.component';
 import { Component, ViewChild, Inject, PLATFORM_ID, OnDestroy } from '@angular/core';
-import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Player } from './player';
 import { LetterTile } from './lettertile';
 import * as _ from 'lodash';
 import { Word } from './word';
+import { Game } from './game';
 
 // https://hackernoon.com/import-json-into-typescript-8d465beded79
 // import * as worddata from './words.json'; // dit kunnen we doen als de hele woordenlijst compleet is.
 // We kunnen namelijk niet terugschrijven naar deze json.
-
-enum State {
-  inputPlayers,
-  player1,
-  player2
-}
 
 class WordScore {
   constructor(public word: string, public score: number) {
@@ -31,12 +25,12 @@ export class AppComponent implements OnDestroy {
 
   @ViewChild(BoardComponent) board: BoardComponent;
 
-  public State = State;
-  public state: State;
+  public isStartScreenVisible: boolean;
   public form: FormGroup;
-  public players: Player[];
-  public activePlayer: Player;
-  public committedLetters: LetterTile[];
+
+  private allGames: Game[];
+  private activeGame: Game;
+
   public placedLetters: LetterTile[];
   public errors: string[];
   public currentScore: number;
@@ -45,7 +39,7 @@ export class AppComponent implements OnDestroy {
   private allWords: string[] = [];
 
   get allLetters() {
-    return [...this.committedLetters, ...this.placedLetters];
+    return [...this.activeGame.committedLetters, ...this.placedLetters];
   }
 
   get newWordStrings(): WordScore[] {
@@ -57,31 +51,40 @@ export class AppComponent implements OnDestroy {
     @Inject(PLATFORM_ID) private platformId: any,
     @Inject('LOCALSTORAGE') private localStorage: any
   ) {
-    this.state = State.inputPlayers;
     this.form = new FormGroup({
       player1Name: new FormControl('Rob'),
       player2Name: new FormControl(),
       startPlayer: new FormControl('1')
     });
-    this.committedLetters = [];
     this.placedLetters = [];
+    this.allGames = [];
     this.loadAllWords();
+    this.loadAllGames();
+    this.isStartScreenVisible = true;
   }
 
   ngOnDestroy() {
     this.saveAllWords();
+    this.saveAllGames();
   }
 
   startGame() {
-    this.players = [new Player(this.form.get('player1Name').value), new Player(this.form.get('player2Name').value)];
+    this.activeGame = new Game();
+    this.allGames.push(this.activeGame);
+    this.activeGame.players = [new Player(this.form.get('player1Name').value), new Player(this.form.get('player2Name').value)];
     if (this.form.get('startPlayer').value === '1') {
-      this.state = State.player1;
-      this.activePlayer = this.players[0];
+      this.activeGame.activePlayer = this.activeGame.players[0];
     } else {
-      this.state = State.player2;
-      this.activePlayer = this.players[1];
+      this.activeGame.activePlayer = this.activeGame.players[1];
     }
     this.placedLetters = [];
+    this.isStartScreenVisible = false;
+    this.saveAllGames();
+  }
+
+  loadSavedGame(game: Game) {
+    this.activeGame = game;
+    this.isStartScreenVisible = false;
   }
 
   onLetterPlaced(letterTile: LetterTile) {
@@ -137,7 +140,7 @@ export class AppComponent implements OnDestroy {
   }
 
   private validateConnectedToExisting(): string {
-    const connectedLetters = [...this.committedLetters];
+    const connectedLetters = [...this.activeGame.committedLetters];
     const lettersToCheck = [...this.placedLetters];
     const all = [...this.allLetters];
     let error: boolean;
@@ -203,13 +206,14 @@ export class AppComponent implements OnDestroy {
   }
 
   private commitPlacedLetters() {
-    this.allWords = _.orderBy([...this.allWords, ...this.newWordStrings.map(n => n.word)]);
+    this.allWords = _.orderBy(_.uniqBy([...this.allWords, ...this.newWordStrings.map(n => n.word)]));
     this.saveAllWords();
-    this.committedLetters = this.allLetters;
+    this.activeGame.committedLetters = this.allLetters;
     this.allLetters.forEach(t => { t.isNew = false; t.isHighlighted = false; });
     this.placedLetters = [];
     this.newWords = [];
-    this.activePlayer.score += this.currentScore;
+    this.activeGame.activePlayer.score += this.currentScore;
+    this.saveAllGames();
   }
 
   private determineNewWords() {
@@ -269,7 +273,8 @@ export class AppComponent implements OnDestroy {
   }
 
   private nextPlayer() {
-    this.activePlayer = this.activePlayer === this.players[0] ? this.players[1] : this.players[0];
+    this.activeGame.activePlayer =
+      this.activeGame.activePlayer === this.activeGame.players[0] ? this.activeGame.players[1] : this.activeGame.players[0];
   }
 
   private log(text: string, ...optionalParams: any[]) {
@@ -285,6 +290,16 @@ export class AppComponent implements OnDestroy {
     if (this.allWords == null) {
       this.allWords = [];
     }
-    console.log(this.allWords)
+  }
+
+  private saveAllGames() {
+    this.localStorage.setItem('wordfeud_games', JSON.stringify(this.allGames));
+  }
+
+  private loadAllGames() {
+    this.allGames = JSON.parse(this.localStorage.getItem('wordfeud_games'));
+    if (this.allGames == null) {
+      this.allGames = [];
+    }
   }
 }

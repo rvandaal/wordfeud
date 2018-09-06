@@ -1,13 +1,13 @@
 <div class="main">
-  <div class="wordlist" *ngIf="state !== State.inputPlayers">
+  <div class="wordlist" *ngIf="!isStartScreenVisible">
     <div class="wordlistlabel">Woorden:</div>
     <div class="wordcontainer">
       <div *ngFor="let word of allWords">{{word}}</div>
     </div>
   </div>
-  <app-board #board *ngIf="state !== State.inputPlayers" [letters]="allLetters" (letterPlaced)="onLetterPlaced($event)"></app-board>
+  <app-board #board *ngIf="!isStartScreenVisible" [letters]="allLetters" (letterPlaced)="onLetterPlaced($event)"></app-board>
   <div class="controlcontainer">
-    <form class="editform" [formGroup]="form" *ngIf="state === State.inputPlayers">
+    <form class="editform" [formGroup]="form" *ngIf="isStartScreenVisible">
       <div class="form-group">
         <label for="player1">Mijn naam</label>
         <input #player1 id="player1" type="text" class="form-control" formControlName="player1Name" />
@@ -26,10 +26,18 @@
         <br>
         <button *ngIf="form.get('startPlayer').value !== null" class="form-control" (click)="startGame()">Start game</button>
       </div>
+      <div class="saved-games">
+        <div>Opgeslagen games</div>
+        <div class="saved-game-container">
+          <div class="saved-game" *ngFor="let game of allGames">
+            <button class="btn btn-primary" (click)="loadSavedGame(game)">{{game.players[0].name}}({{game.players[0].score}}) vs {{game.players[1].name}}({{game.players[1].score}})</button>
+          </div>
+        </div>
+      </div>
     </form>
-    <div class="player-panel" *ngIf="state !== State.inputPlayers">
-      <div class="player-info" *ngFor="let player of players">
-          <div class="player-name" [ngClass]="{'selected': player === activePlayer}">{{player.name}}, score: {{player.score}}</div>
+    <div class="player-panel" *ngIf="!isStartScreenVisible">
+      <div class="player-info" *ngFor="let player of activeGame.players">
+          <div class="player-name" [ngClass]="{'selected': player.name === activeGame.activePlayer.name}">{{player.name}}, score: {{player.score}}</div>
           <br>
       </div>
       <br>
