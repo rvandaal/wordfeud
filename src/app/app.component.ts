@@ -87,6 +87,26 @@ export class AppComponent implements OnDestroy {
     this.isStartScreenVisible = false;
   }
 
+  removeGame() {
+    this.goBackToStartScreen();
+    const index = this.allGames.map(g => g.getId()).indexOf(this.activeGame.getId());
+    if (index < 0) {
+      throw Error('te verwijderen game bestaat niet in de lijst');
+    }
+    this.allGames.splice(index, 1);
+    this.activeGame = null;
+    this.saveAllGames();
+  }
+
+  goBackToStartScreen() {
+    this.isStartScreenVisible = true;
+    this.placedLetters = [];
+    this.newWords = [];
+    this.errors = [];
+    this.currentScore = 0;
+    this.form.reset();
+  }
+
   onLetterPlaced(letterTile: LetterTile) {
     const existingLetter = this.getLetter(this.placedLetters, letterTile.cell.row, letterTile.cell.col);
     const sameLetter = existingLetter ? existingLetter.letter === letterTile.letter : false;
@@ -109,6 +129,7 @@ export class AppComponent implements OnDestroy {
       this.commitPlacedLetters();
       this.errors = [];
       this.nextPlayer();
+      this.saveAll();
     }
   }
 
@@ -207,13 +228,11 @@ export class AppComponent implements OnDestroy {
 
   private commitPlacedLetters() {
     this.allWords = _.orderBy(_.uniqBy([...this.allWords, ...this.newWordStrings.map(n => n.word)]));
-    this.saveAllWords();
     this.activeGame.committedLetters = this.allLetters;
     this.allLetters.forEach(t => { t.isNew = false; t.isHighlighted = false; });
     this.placedLetters = [];
     this.newWords = [];
     this.activeGame.activePlayer.score += this.currentScore;
-    this.saveAllGames();
   }
 
   private determineNewWords() {
@@ -297,9 +316,23 @@ export class AppComponent implements OnDestroy {
   }
 
   private loadAllGames() {
-    this.allGames = JSON.parse(this.localStorage.getItem('wordfeud_games'));
-    if (this.allGames == null) {
+    const loadedGames = [];
+    const json = JSON.parse(this.localStorage.getItem('wordfeud_games'));
+    if (json) {
+      Object.keys(json).forEach(k => loadedGames.push(Game.deserialize(json[k])));
+      this.allGames = loadedGames;
+    } else {
       this.allGames = [];
     }
+  }
+
+  private saveAll() {
+    this.saveAllWords();
+    this.saveAllGames();
+  }
+
+  private loadAll() {
+    this.loadAllWords();
+    this.loadAllGames();
   }
 }

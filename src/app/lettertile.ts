@@ -6,6 +6,13 @@ export class LetterTile {
     public isHighlighted: boolean;
     public isJoker: boolean;
 
+    static deserialize(json: any): LetterTile {
+        const letterTile = new LetterTile(json.letter, GridCell.deserialize(json.cell));
+        letterTile.isJoker = json.isJoker;
+        letterTile.isNew = json.isNew;
+        return letterTile;
+    }
+
     constructor(letter: string, cell: GridCell) {
         this.letter = letter;
         this.isNew = true;

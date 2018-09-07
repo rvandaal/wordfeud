@@ -52,6 +52,10 @@
       <br>
       <button class="form-control" (click)="clearPlacedLetters()">Wis</button>
       <br>
+      <button class="form-control" (click)="removeGame()">Verwijder deze game</button>
+      <br>
+      <button class="form-control" (click)="goBackToStartScreen()">Terug naar startscherm</button>
+      <br>
       <br>
       <div class="error" *ngFor="let error of errors">{{error}}</div>
     </div>
