@@ -16,6 +16,11 @@ class WordScore {
   }
 }
 
+class LetterCount {
+  constructor(public letter: string, public count: number) {
+  }
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -37,6 +42,8 @@ export class AppComponent implements OnDestroy {
   public newWords: Word[] = [];
 
   private allWords: string[] = [];
+  public letterCounts: LetterCount[];
+  private lettercounts: any;
 
   get allLetters() {
     return [...this.activeGame.committedLetters, ...this.placedLetters];
@@ -80,10 +87,50 @@ export class AppComponent implements OnDestroy {
     this.placedLetters = [];
     this.isStartScreenVisible = false;
     this.saveAllGames();
+    this.updateLetterCounts();
+  }
+
+  updateLetterCounts() {
+    this.lettercounts = {
+      A: 7,
+      B: 2,
+      C: 2,
+      D: 5,
+      E: 18,
+      F: 2,
+      G: 3,
+      H: 2,
+      I: 4,
+      J: 2,
+      K: 3,
+      L: 3,
+      M: 3,
+      N: 11,
+      O: 6,
+      P: 2,
+      Q: 1,
+      R: 5,
+      S: 5,
+      T: 5,
+      U: 3,
+      V: 2,
+      W: 2,
+      X: 1,
+      Y: 1,
+      Z: 2
+    };
+    this.activeGame.committedLetters.forEach(c => this.lettercounts[c.letter]--);
+    this.updateLetterCountsArray();
+  }
+
+  updateLetterCountsArray() {
+    this.letterCounts = [];
+    Object.keys(this.lettercounts).forEach(l => this.letterCounts.push(new LetterCount(l, this.lettercounts[l])));
   }
 
   loadSavedGame(game: Game) {
     this.activeGame = game;
+    this.updateLetterCounts();
     this.isStartScreenVisible = false;
   }
 
@@ -127,6 +174,7 @@ export class AppComponent implements OnDestroy {
       this.errors = result;
     } else {
       this.commitPlacedLetters();
+      this.updateLetterCounts();
       this.errors = [];
       this.nextPlayer();
       this.saveAll();

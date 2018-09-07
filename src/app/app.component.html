@@ -5,6 +5,12 @@
       <div *ngFor="let word of allWords">{{word}}</div>
     </div>
   </div>
+  <div class="letterlist" *ngIf="!isStartScreenVisible">
+      <div class="letterlistlabel">Letters:</div>
+      <div class="lettercontainer">
+        <div *ngFor="let letterCount of letterCounts">{{letterCount.letter}}: {{letterCount.count}}</div>
+      </div>
+    </div>
   <app-board #board *ngIf="!isStartScreenVisible" [letters]="allLetters" (letterPlaced)="onLetterPlaced($event)"></app-board>
   <div class="controlcontainer">
     <form class="editform" [formGroup]="form" *ngIf="isStartScreenVisible">
